@@ -9,13 +9,17 @@ import dash_bootstrap_components as dbc
 df = pd.read_csv("data/new-neonatal-tetanas-with-continent.csv")
 tetanus_deaths_by_age_gp = pd.read_csv("data/tetanus-deaths-by-age-group_mod.csv")
 tetanus_deaths_by_age_gp = tetanus_deaths_by_age_gp.melt(id_vars=["Entity", 'Year', 'Code'],
-                                                         var_name='Age-group',
+                                                         var_name='Age Group',
                                                          value_name='Deaths')
 who_vs_gbd = pd.read_csv("data/who-vs-gbd-incidence-of-tetanus_mod.csv")
 
+content = "Tetanus is a bacterial infection that leads to painful muscle contractions, typically beginning in the jaw " \
+          "and then progressing to the rest of the body. In recent years, tetanus has been fatal ‘in approximately " \
+          "11% of reported cases’.1 Globally 38,000 people died from tetanus in 2017. Around half (49%) were younger " \
+          "than five years old."
+
 slider = html.Div(
     [
-        dbc.Label("Choose Year", html_for="slider"),
         dcc.Slider(id="year-slider",
                    min=df['Year'].min(),
                    max=df['Year'].max(),
@@ -40,6 +44,18 @@ slider = html.Div(
     className="mb-3",
 )
 
+slider_ui = html.Div(
+    id="slider-container",
+    children=[
+        html.P(
+            id="slider-text",
+            children="Drag the slider to change the year:",
+        ),
+        slider,
+
+    ]
+
+)
 continent_dropdown = html.Div(
     [
         dbc.Label("Choose a Continent", html_for="dropdown"),
@@ -51,7 +67,6 @@ continent_dropdown = html.Div(
     ],
     className="mb-3",
 )
-
 
 dropdown = html.Div(
     [
@@ -78,29 +93,52 @@ app.layout = html.Div(
                 html.H4(children="Global Burden of Tetanus"),
                 html.P(
                     id="description",
-                    children="Tetanus is a bacterial infection that leads to painful muscle contractions, typically "
-                             "beginning in the jaw and then progressing to the rest of the body. In recent years, "
-                             "tetanus has been fatal ‘in approximately 11% of reported cases’.1 Globally 38,"
-                             "000 people died from tetanus in 2017. Around half (49%) were younger than five years "
-                             "old.",
+                    children=content
                 ),
             ],
         ),
-        dbc.Container(
+        html.Div(
+            id='app-container',
             children=[
-                html.H4('Number of Reported Cases per million in The World', id='h3-country'),
-                continent_dropdown,
-                dcc.Graph(id='world-map'),
-                slider,
-                dbc.Col(dropdown),
-                dbc.Container([
-                    html.H4('Deaths from Tetanus in India', id='h1-country'),
-                    dcc.Graph(id='tetanus-deaths-ts')
-                ]),
-                dbc.Container([
-                    html.H4('WHO vs. IHME incidence of tetanus, India', id='h2-country'),
-                    dcc.Graph(id='tetanus-incidence-ts')
-                ])
+                slider_ui,
+                html.Div(
+                    id="map-container",
+                    children=[
+                        continent_dropdown,
+                        html.H4('Number of Reported Cases per million in The World',
+                                id='h3-country'),
+                        dcc.Graph(id='world-map'),
+                    ]
+
+                ),
+                html.Div(
+                    id='graph-container',
+                    children=[
+                        dropdown,
+                        html.H4('Deaths from Tetanus in India', id='h1-country'),
+                        dcc.Graph(id='tetanus-deaths-ts',
+                                  figure=dict(
+                                      data=[dict(x=0, y=0)],
+                                      layout=dict(
+                                          paper_bgcolor="#F4F4F8",
+                                          plot_bgcolor="#F4F4F8",
+                                          autofill=True,
+                                          margin=dict(t=75, r=50, b=100, l=50),
+                                      ))),
+                        html.H4('WHO vs. IHME incidence of tetanus, India', id='h2-country'),
+                        dcc.Graph(id='tetanus-incidence-ts',
+                                  figure=dict(
+                                      data=[dict(x=0, y=0)],
+                                      layout=dict(
+                                          paper_bgcolor="#F4F4F8",
+                                          plot_bgcolor="#F4F4F8",
+                                          autofill=True,
+                                          margin=dict(t=75, r=50, b=100, l=50),
+                                      )))
+
+                    ]
+
+                ),
             ])
 
     ])
@@ -111,7 +149,6 @@ app.layout = html.Div(
     Input('continent-dropdown', 'value'),
     Input('year-slider', 'value'))
 def update_figure(continent, selected_year):
-
     filtered_df = df.query("Year == @selected_year and Continent == @continent")
 
     fig = go.Figure(data=go.Choropleth(
@@ -129,7 +166,7 @@ def update_figure(continent, selected_year):
         showframe=False,
         showcoastlines=False,
         projection_type='equirectangular'
-    ),)
+    ), )
 
     fig.update_layout(transition_duration=500)
 
@@ -148,12 +185,40 @@ def update_figure(country):
     fig = px.scatter(filtered_df,
                      x='Year',
                      y='Deaths',
-                     color='Age-group')
+                     color='Age Group')
 
-    fig.update_traces(mode='lines+markers',
+    fig.update_traces(mode='lines+markers', marker=dict(size=3.8),
                       connectgaps=True)
     fig.update_xaxes(showgrid=False)
     fig.update_layout(transition_duration=500)
+
+    fig.update_layout(
+        xaxis=dict(
+            showline=True,
+            showticklabels=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=2,
+            ticks='outside',
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='rgb(82, 82, 82)',
+            )),
+        yaxis=dict(
+            showline=True,
+            showticklabels=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=2,
+            ticks='outside',
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='rgb(82, 82, 82)',
+            )),
+        plot_bgcolor='white',
+        autosize=False,
+
+    )
 
     return fig
 
@@ -175,6 +240,35 @@ def update_figure(country):
                       connectgaps=True)
     fig.update_xaxes(showgrid=False)
     fig.update_layout(transition_duration=500)
+    fig.update_traces(mode='lines+markers', connectgaps=True, marker=dict(size=3.8))
+
+    fig.update_layout(
+        xaxis=dict(
+            showline=True,
+            showticklabels=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=2,
+            ticks='outside',
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='rgb(82, 82, 82)',
+            )),
+        yaxis=dict(
+            showline=True,
+            showticklabels=True,
+            linecolor='rgb(204, 204, 204)',
+            linewidth=2,
+            ticks='outside',
+            tickfont=dict(
+                family='Arial',
+                size=12,
+                color='rgb(82, 82, 82)',
+            )),
+        plot_bgcolor='white',
+        autosize=False,
+
+    )
 
     return fig
 
@@ -190,10 +284,10 @@ def update_h1(country):
 def update_h1(country):
     return "WHO vs. IHME incidence of tetanus, {}".format(country)
 
+
 @app.callback(Output('h3-country', 'children'),
               Input('continent-dropdown', 'value'),
               Input('year-slider', 'value'))
-
 def update_h1(country, year):
     return "Number of Reported Cases per million in {} ({})".format(country, year)
 
