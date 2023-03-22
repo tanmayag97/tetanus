@@ -113,7 +113,7 @@ continent_dropdown = dbc.Card(
                 dbc.Label("Select a Continent", html_for="dropdown"),
                 dcc.Dropdown(
                     id="continent-dropdown",
-                    options=[{"label": i, "value": i} for i in df['Continent'].unique().tolist()],
+                    options=[{"label": i, "value": i} for i in sorted(df['Continent'].unique().tolist())],
                     value="The World"
                 ),
             ],
@@ -191,7 +191,7 @@ app.layout = dbc.Container([
                             'box-shadow': '0px 0px 10px #ddd'
                         }
                         )
-            ], md=7),
+            ], md=6),
             dbc.Col([
                 dbc.Row(graph_dropdown,
                         style=custom_style_dict
@@ -217,12 +217,20 @@ def update_figure(continent, selected_year):
         locations=filtered_df['Code'],
         z=filtered_df['Indicator:Neonatal tetanus - number of reported cases per million'],
         text=filtered_df['Entity'],
-        colorscale='Blues',
+        colorscale=[[0, 'rgb(201,83,35)'],
+                    [0.2, 'rgb(224,113,49)'],
+                    [0.4, 'rgb(238,147,79)'],
+                    [0.6, 'rgb(246,210,168)'],
+                    [0.8, 'rgb(250,231,209)'],
+                    [1, 'rgb(251,251,225)']],
         autocolorscale=False,
         reversescale=True,
+        colorbar_len=0.9,
+        colorbar_orientation="h",
         marker_line_color='darkgray',
         marker_line_width=0.3,
-        colorbar_title='Cases per million people'))
+        colorbar_title='Cases per million people',
+    ))
     fig.update_geos(fitbounds='locations')
     fig.update_layout(geo=dict(
         showframe=False,
@@ -230,9 +238,11 @@ def update_figure(continent, selected_year):
         projection_type='equirectangular'),
         height=600,
         width=600,
-        margin=dict(l=0, r=0, t=0, b=0))
-    fig.update_traces(showscale=False)
-    fig.update_layout(transition_duration=500, )
+        margin=dict(l=0, r=0, t=0, b=0),
+    )
+    fig.update_traces(showscale=True)
+    fig.update_coloraxes(colorbar_orientation="h")
+    fig.update_layout(transition_duration=500)
 
     return fig
 
@@ -256,6 +266,12 @@ def update_figure(graph_name, country):
         fig.update_layout(transition_duration=500)
 
         fig.update_layout(
+            legend=dict(
+                yanchor="top",
+                y=1.1,
+                xanchor="right",
+                x=1.2
+            ),
             xaxis=dict(
                 showline=True,
                 showticklabels=True,
@@ -298,6 +314,13 @@ def update_figure(graph_name, country):
         fig.update_traces(mode='lines+markers', connectgaps=True, marker=dict(size=3.8))
 
         fig.update_layout(
+            legend=dict(
+                yanchor="top",
+                y=1.1,
+                xanchor="right",
+                x=1.2
+            ),
+            legend_title="",
             xaxis=dict(
                 showline=True,
                 showticklabels=True,
