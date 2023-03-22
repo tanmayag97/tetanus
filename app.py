@@ -1,9 +1,7 @@
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
-from dash import Dash, Input, Output
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import Dash, Input, Output, State, dcc, html
 import dash_bootstrap_components as dbc
 
 df = pd.read_csv("data/new-neonatal-tetanas-with-continent.csv")
@@ -13,10 +11,51 @@ tetanus_deaths_by_age_gp = tetanus_deaths_by_age_gp.melt(id_vars=["Entity", 'Yea
                                                          value_name='Deaths')
 who_vs_gbd = pd.read_csv("data/who-vs-gbd-incidence-of-tetanus_mod.csv")
 
-content = "Tetanus is a bacterial infection that leads to painful muscle contractions, typically beginning in the jaw " \
-          "and then progressing to the rest of the body. In recent years, tetanus has been fatal ‘in approximately " \
-          "11% of reported cases’.1 Globally 38,000 people died from tetanus in 2017. Around half (49%) were younger " \
-          "than five years old."
+content = """
+        Tetanus is a bacterial infection that leads to painful muscle contractions, typically beginning in the jaw 
+        and then progressing to the rest of the body. In recent years, tetanus has been fatal ‘in approximately 
+        11% of reported cases’. Globally 38,000 people died from tetanus in 2017. Around half (49%) were younger 
+        than five years old. This dashboard presents a global overview on tetanus and MNT, presenting data on cases and 
+        deaths,and explaining transmission,prevention and the efforts to eliminate tetanus.
+"""
+heading_jumbotron = html.Div(
+    dbc.Card(
+        dbc.Container(
+            children=[
+                html.H1("Global Burden of Tetanus", className="display-3"),
+
+                html.Hr(className="my-2"),
+                html.P(
+                    content
+                ),
+            ],
+            fluid=True,
+            className="py-3",
+        )),
+    className="p-3 bg-light rounded-3",
+)
+
+#
+# collapse = html.Div(
+#     [
+#         dbc.Button(
+#             "More facts about Tetanus",
+#             id="collapse-button",
+#             className="mb-3",
+#             color="primary",
+#             n_clicks=0,
+#         ),
+#         dbc.Collapse(
+#             dbc.Card(dbc.CardBody("""
+#             Tetanus is a disease caused by the toxin of a bacterium. There are two ways by which the disease can be contracted:
+#             Tetanus can be contracted from dirt that enters through wounds, and can ultimately cause paralysis and death.
+# When mothers or newborns contract tetanus through wounds during birth, this is called maternal/neonatal tetanus (MNT). It can be prevented by immunizing the mother who passes the immunity on to her newborn for a few days after birth.
+#             """)),
+#             id="collapse",
+#             is_open=False,
+#         ),
+#     ]
+# )
 
 slider = html.Div(
     [
@@ -68,7 +107,7 @@ continent_dropdown = html.Div(
     className="mb-3",
 )
 
-dropdown = html.Div(
+country_dropdown = html.Div(
     [
         dbc.Label("Choose a Country", html_for="dropdown"),
         dcc.Dropdown(
@@ -81,66 +120,82 @@ dropdown = html.Div(
 )
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# external_stylesheets = ['dbc.themes.BOOTSTRAP']
+
 
 app = Dash(__name__, external_stylesheets=external_stylesheets)
 
-app.layout = html.Div(
+app.layout = dbc.Container(
     id='root',
+    fluid=False,
     children=[
-        html.Div(
-            id="header",
-            children=[
-                html.H4(children="Global Burden of Tetanus"),
-                html.P(
-                    id="description",
-                    children=content
-                ),
-            ],
-        ),
+        dbc.Row(heading_jumbotron),
         html.Div(
             id='app-container',
             children=[
-                slider_ui,
-                html.Div(
-                    id="map-container",
-                    children=[
-                        continent_dropdown,
-                        html.H4('Number of Reported Cases per million in The World',
-                                id='h3-country'),
-                        dcc.Graph(id='world-map'),
-                    ]
+                dbc.Row(
+                    [
+                        dbc.Col(
+                            children=[
+                                slider_ui,
+                                html.Div(
+                                    id="map-container",
+                                    children=[
+                                        continent_dropdown,
+                                        html.H4('Number of Reported Cases per million in The World',
+                                                id='h3-country'),
+                                        dcc.Graph(id='world-map'),
+                                    ]
 
-                ),
-                html.Div(
-                    id='graph-container',
-                    children=[
-                        dropdown,
-                        html.H4('Deaths from Tetanus in India', id='h1-country'),
-                        dcc.Graph(id='tetanus-deaths-ts',
-                                  figure=dict(
-                                      data=[dict(x=0, y=0)],
-                                      layout=dict(
-                                          paper_bgcolor="#F4F4F8",
-                                          plot_bgcolor="#F4F4F8",
-                                          autofill=True,
-                                          margin=dict(t=75, r=50, b=100, l=50),
-                                      ))),
-                        html.H4('WHO vs. IHME incidence of tetanus, India', id='h2-country'),
-                        dcc.Graph(id='tetanus-incidence-ts',
-                                  figure=dict(
-                                      data=[dict(x=0, y=0)],
-                                      layout=dict(
-                                          paper_bgcolor="#F4F4F8",
-                                          plot_bgcolor="#F4F4F8",
-                                          autofill=True,
-                                          margin=dict(t=75, r=50, b=100, l=50),
-                                      )))
+                                ),
 
-                    ]
+                            ]
 
+                        ),
+                        dbc.Col(
+                            html.Div(
+                                id='graph-container',
+                                children=[
+                                    dbc.Row(country_dropdown),
+                                    dbc.Row(
+                                        children=[
+                                            dbc.Col(
+                                                children=[
+                                                    html.H4('Deaths from Tetanus in India', id='h1-country'),
+                                                    dcc.Graph(id='tetanus-deaths-ts',
+                                                              figure=dict(
+                                                                  data=[dict(x=0, y=0)],
+                                                                  layout=dict(
+                                                                      paper_bgcolor="#F4F4F8",
+                                                                      plot_bgcolor="#F4F4F8",
+                                                                      autofill=True,
+                                                                      margin=dict(t=75, r=50, b=100, l=50),
+                                                                  )))
+                                                ]),
+                                            dbc.Col(
+                                                children=[
+                                                    html.H4('WHO vs. IHME incidence of tetanus, India',
+                                                            id='h2-country'),
+                                                    dcc.Graph(id='tetanus-incidence-ts',
+                                                              figure=dict(
+                                                                  data=[dict(x=0, y=0)],
+                                                                  layout=dict(
+                                                                      paper_bgcolor="#F4F4F8",
+                                                                      plot_bgcolor="#F4F4F8",
+                                                                      autofill=True,
+                                                                      margin=dict(t=75, r=50, b=100, l=50),
+                                                                  )))
+                                                ]
+
+                                            )
+                                        ]
+
+                                    ),
+                                ]
+                            ),
+                        )]
                 ),
             ])
-
     ])
 
 
@@ -292,4 +347,4 @@ def update_h1(country, year):
     return "Number of Reported Cases per million in {} ({})".format(country, year)
 
 
-app.run_server(debug=True, use_reloader=False)  # Turn off reloader if inside Jupyter
+app.run_server(debug=True)  # Turn off reloader if inside Jupyter
