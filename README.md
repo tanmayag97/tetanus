@@ -5,7 +5,7 @@ Tetanus is a bacterial infection that leads to painful muscle contractions, typi
 
 ## The Contributors
 
-I(https://github.com/tanmayag97) am a student at UBC, Vancouver, part of the Master of Data Science program:
+[I](https://github.com/tanmayag97) am a student at UBC, Vancouver, part of the Master of Data Science program:
 
 
 ## The Contributing Guidelines
