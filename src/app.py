@@ -4,13 +4,13 @@ import dash_bootstrap_components as dbc
 import plotly.graph_objects as go
 import plotly.express as px
 
-df = pd.read_csv("data/new-neonatal-tetanas-with-continent.csv")
-tetanus_deaths_by_age_gp = pd.read_csv("data/tetanus-deaths-by-age-group_mod.csv")
+df = pd.read_csv("../data/new-neonatal-tetanas-with-continent.csv")
+tetanus_deaths_by_age_gp = pd.read_csv("../data/tetanus-deaths-by-age-group_mod.csv")
 tetanus_deaths_by_age_gp = tetanus_deaths_by_age_gp.melt(id_vars=["Entity", 'Year', 'Code'],
                                                          var_name='Age Group',
                                                          value_name='Deaths')
 
-who_vs_gbd = pd.read_csv("data/who-vs-gbd-incidence-of-tetanus_mod.csv")
+who_vs_gbd = pd.read_csv("../data/who-vs-gbd-incidence-of-tetanus_mod.csv")
 custom_style_dict = {
     'background-color': '#f8f9fa',
     'padding': '15px',
@@ -360,4 +360,4 @@ def update_option_text(continent):
     return dbc.Label("Select a Country from {}".format(continent))
 
 
-app.run_server(debug=True, port=4242)
+server = app.server
