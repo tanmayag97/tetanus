@@ -10,7 +10,7 @@ I am a [student](https://github.com/tanmayag97) at UBC, Vancouver, part of the M
 
 ## Overview
 
-The dataset for this dashboard is extracted from this [website](https://ourworldindata.org/tetanus). The motivation, purpose, description of data and research question can be found in our proposal.
+The dataset for this dashboard is extracted from this [website](https://ourworldindata.org/tetanus). The motivation, purpose, description of data and research question can be found in our [proposal](https://github.com/tanmayag97/tetanus/blob/main/docs/proposal.md).
 
 ## Usage
 
