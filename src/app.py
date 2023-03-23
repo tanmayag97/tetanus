@@ -23,10 +23,10 @@ app = Dash(__name__, external_stylesheets=[dbc.themes.JOURNAL])
 
 content = """
         Tetanus is a bacterial infection that leads to painful muscle contractions, typically beginning in the jaw 
-        and then progressing to the rest of the body. In recent years, tetanus has been fatal ‘in approximately 
-        11% of reported cases’. Globally 38,000 people died from tetanus in 2017. Around half (49%) were younger 
+        and then progressing to the rest of the body. In recent years, tetanus has been fatal in approximately 
+        11% of reported cases. Globally 38,000 people died from tetanus in 2017. Around half (49%) were younger 
         than five years old. This dashboard presents a global overview on tetanus and MNT, presenting data on cases and 
-        deaths,and explaining transmission,prevention and the efforts to eliminate tetanus.
+        deaths.
 """
 
 heading_jumbotron = html.Div(
